@@ -10,7 +10,7 @@ from sklearn.pipeline import make_pipeline
 from sklearn.cluster import KMeans
 
 class JavaCodeReviewer:
-    def __init__(self, project_dir, api_key, model_file="code_review_model.pkl", style_model_file="style_detector.pkl"):
+    def __init__(self, project_dir, api_key, model_file="models/code_review_model.pkl", style_model_file="models/style_detector.pkl"):
         self.project_dir = project_dir
         self.api_key = api_key
         self.model_file = model_file
