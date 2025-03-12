@@ -6,12 +6,14 @@ The **Java Code Review Tool** is a Python-based utility that analyzes Java proje
 - **Using DeepSeek AI** to review code and suggest improvements.
 - **Classifying Java code** (e.g., class, method, conditional) using **Naïve Bayes ML**.
 - **Detecting style inconsistencies** using **KMeans clustering**.
-- **Generating reports** with code review feedback, classification, and style analysis.
+- **Automatically updating Java files** based on AI-suggested improvements.
+- **Generating reports** with code review feedback, classification, and applied updates.
 
 ## Features
 - **DeepSeek AI-powered code review** with automated suggestions.
 - **Machine learning model** for Java code classification.
 - **Style analysis** to detect formatting discrepancies.
+- **Automated Java file updates** using AI-reviewed improvements.
 - **CSV report generation** for structured insights.
 
 ## Installation
@@ -55,6 +57,7 @@ The tool generates:
 2. **DeepSeek AI Analysis** - Automated suggestions and feedback for each file.
 3. **Classified Java Code** - Identifies file type (class, method, etc.).
 4. **Style Analysis** - Detects formatting discrepancies using clustering.
+5. **Automatically Updated Java Files** - AI-generated improvements applied to source files.
 
 ## Training Machine Learning Models
 - **To retrain the code classifier:**
@@ -72,6 +75,7 @@ The tool generates:
 - Ensure your **DeepSeek API key** is valid.
 - Large Java projects may take longer to process.
 - The **machine learning models** can be improved with additional training data.
+- AI-based modifications will be directly written to Java files, so ensure you have backups before running.
 
 ## License
 MIT License
@@ -81,4 +85,3 @@ Feel free to fork and contribute to enhance the tool!
 
 ## Author
 Ming Li
-
