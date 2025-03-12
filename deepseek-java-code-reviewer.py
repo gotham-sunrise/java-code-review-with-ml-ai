@@ -37,14 +37,14 @@ class JavaCodeReviewer:
             return f.read()
 
     def analyze_with_deepseek(self, java_code):
-        """Use DeepSeek API to perform code review."""
+        """Use DeepSeek API to perform code review and suggest improvements."""
         url = "https://api.deepseek.com/v1/chat/completions"
         headers = {"Authorization": f"Bearer {self.api_key}", "Content-Type": "application/json"}
         data = {
             "model": "deepseek-code",
             "messages": [
-                {"role": "system", "content": "You are a professional code reviewer."},
-                {"role": "user", "content": f"Review the following Java code and suggest improvements:\n{java_code}"}
+                {"role": "system", "content": "You are a professional code reviewer. Suggest improvements and provide an updated version of the Java code."},
+                {"role": "user", "content": f"Review the following Java code, suggest improvements, and return the modified code:\n{java_code}"}
             ]
         }
         response = requests.post(url, headers=headers, json=data)
@@ -53,74 +53,29 @@ class JavaCodeReviewer:
         else:
             return "DeepSeek API error: Unable to review code."
 
-    def load_model(self):
-        """Load or train a machine learning model for code classification."""
-        if os.path.exists(self.model_file):
-            return joblib.load(self.model_file)
-        else:
-            return self.train_model()
-
-    def train_model(self):
-        """Train a Naïve Bayes classifier for classifying Java code snippets."""
-        sample_codes = [
-            "public class Example { public static void main(String[] args) { System.out.println(\"Hello, World!\"); } }",
-            "private void processData() { int x = 10; x += 5; }",
-            "if (value > 10) { System.out.println(\"High value\"); } else { System.out.println(\"Low value\"); }"
-        ]
-        labels = ["class", "method", "conditional"]
-        
-        model = make_pipeline(CountVectorizer(), MultinomialNB())
-        model.fit(sample_codes, labels)
-        joblib.dump(model, self.model_file)
-        return model
-
-    def classify_code(self, java_code):
-        """Classify Java code snippets using the trained model."""
-        return self.model.predict([java_code])[0]
-
-    def load_style_model(self):
-        """Load or train a machine learning model for detecting code style discrepancies."""
-        if os.path.exists(self.style_model_file):
-            return joblib.load(self.style_model_file)
-        else:
-            return self.train_style_model()
-
-    def train_style_model(self):
-        """Train a KMeans clustering model for style detection."""
-        sample_styles = [
-            "public class Test { public void doSomething() {} }",
-            "class Test{ void doSomething(){} }",
-            "public class Test\n{\n  public void doSomething()\n  {\n  }\n}" 
-        ]
-        
-        vectorizer = TfidfVectorizer()
-        X = vectorizer.fit_transform(sample_styles)
-        
-        model = KMeans(n_clusters=3, random_state=42)
-        model.fit(X)
-        joblib.dump((model, vectorizer), self.style_model_file)
-        return model, vectorizer
-
-    def detect_style_discrepancy(self, java_code):
-        """Detects whether the given Java code follows the dominant style in the project."""
-        model, vectorizer = self.style_model
-        X = vectorizer.transform([java_code])
-        cluster = model.predict(X)[0]
-        return f"Style cluster {cluster}"
+    def update_java_file(self, file_path, updated_code):
+        """Overwrite the original Java file with the AI-suggested improvements."""
+        with open(file_path, "w", encoding="utf-8") as f:
+            f.write(updated_code)
+        print(f"Updated file: {file_path}")
 
     def generate_report(self, output_file):
-        """Generate a report for the reviewed Java files."""
+        """Generate a report for the reviewed Java files and apply AI-suggested updates."""
         java_files = self.traverse_project()
         
         report_data = []
         for java_file in java_files:
             code_content = self.read_java_file(java_file)
             review_feedback = self.analyze_with_deepseek(code_content)
-            classification = self.classify_code(code_content)
-            style_feedback = self.detect_style_discrepancy(code_content)
+            
+            if "Updated Code:" in review_feedback:
+                updated_code = review_feedback.split("Updated Code:")[1].strip()
+                self.update_java_file(java_file, updated_code)
+            else:
+                updated_code = "No update provided."
             
             self.reports[java_file] = review_feedback
-            report_data.append({"File": java_file, "Category": classification, "Review": review_feedback, "Style": style_feedback})
+            report_data.append({"File": java_file, "Review": review_feedback, "Updated": updated_code[:100]})
         
         df = pd.DataFrame(report_data)
         df.to_csv(output_file, index=False)
